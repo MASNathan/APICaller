@@ -113,29 +113,36 @@ class APIcaller
 		$params = array_merge( $params, $this -> _defaultParams );
 		
 		try {
-			$result = file_get_contents( $this ->_api_url . $section . '?' . http_build_query( $params ) );
-			
 			$this -> _lastCall = $this ->_api_url . $section . '?' . http_build_query( $params );
-			/*
+			
 			$curl = curl_init();
-
-			curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section . '?' . http_build_query( $params ) );
-			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5 );
 			
 			switch ( $this -> _method ) {
 				case 'POST':
+					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
 					curl_setopt( $curl, CURLOPT_POST, true );
-					break;
+					curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+				break;
+				
 				case 'PUT':
-					curl_setopt( $curl, CURLOPT_PUT, true );
-					break;
+					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
+					curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'PUT' );
+					curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+				break;
+				
 				case 'DELETE':
+					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
 					curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'DELETE' );
-					break;
-				default:
-					//Should be GET... no need to set opt
-					break;
+					curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+				break;
+				
+				default: //GET
+					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section . '?' . http_build_query( $params ) );
+				break;
 			}
+			
+			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5 );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true);
 
 			$result = curl_exec( $curl );
 
@@ -146,7 +153,7 @@ class APIcaller
 		}
 		
 		$data = json_decode( $result, true );
-		
+
 		switch ( json_last_error() ) {
 			case JSON_ERROR_NONE:
 				return $data;

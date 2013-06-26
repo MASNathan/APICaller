@@ -170,7 +170,6 @@ class APIcaller
 
 		switch ( json_last_error() ) {
 			case JSON_ERROR_NONE:
-				return $data;
 				break;
 	        case JSON_ERROR_DEPTH:
 	            throw new Exception("Maximum stack depth exceeded");

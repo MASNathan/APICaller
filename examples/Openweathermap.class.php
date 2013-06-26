@@ -2,6 +2,15 @@
 
 require_once '../APIcaller.class.php';
 
+/**
+ * @desc 	Openweathermap - API Wrapper for http://openweathermap.org/
+ * 			Simple example on How to use the APIcaller class to call an API
+ * @author 	André Filipe <andre.r.flip@gmail.com>
+ * @version 0.1.0 - 26-06-2013 21:06:00
+ *     - release into the wild
+ * 
+ * @url https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Openweathermap.class.php
+ */
 class Openweathermap extends APIcaller
 {
 	private static $_me = null;
@@ -16,16 +25,18 @@ class Openweathermap extends APIcaller
 		if ( $apiid )
 			$this -> setDefault( 'APPID', 	$apiid );
 		$this -> setDefault( 'mode', 	'json' );
+		
+		self::$_me = $this;
 	}
 	
 	/**
 	 * Returns itself
 	 * @return obj
 	 */
-	static public function getInstance( $apiid = '')
+	static public function getInstance()
 	{
 		if ( !self::$_me instanceof Openweathermap )
-			self::$_me = new self( $apiid );
+			self::$_me = new self();
 		
 		return self::$_me;
 	}
@@ -67,7 +78,8 @@ class Openweathermap extends APIcaller
 	
 	/**
 	 * Seaching current weather by geographic coordinats
-	 * @param string $cityname
+	 * @param double $lat
+	 * @param double $lon
 	 * @return array
 	 */
 	public function getCurrentWeatherByCoordinats( $lat, $lon )
@@ -81,7 +93,7 @@ class Openweathermap extends APIcaller
 		
 	/**
 	 * Seaching current weather by city ID
-	 * @param string $cityname
+	 * @param integer $id
 	 * @return array
 	 */
 	public function getCurrentWeatherByID( $id )
@@ -95,6 +107,7 @@ class Openweathermap extends APIcaller
 	/**
 	 * Seaching forecast by city name
 	 * @param string $cityname
+	 * @param integer $numberOfDays
 	 * @return array
 	 */
 	public function getForecastByCity( $cityName, $numberOfDays = 1 )
@@ -108,7 +121,9 @@ class Openweathermap extends APIcaller
 	
 	/**
 	 * Seaching forecast by geographic coordinats
-	 * @param string $cityname
+	 * @param double $lat
+	 * @param double $lon
+	 * @param integer $numberOfDays
 	 * @return array
 	 */
 	public function getForecastByCoordinats( $lat, $lon, $numberOfDays = 1 )
@@ -123,7 +138,8 @@ class Openweathermap extends APIcaller
 		
 	/**
 	 * Seaching forecast by city ID
-	 * @param string $cityname
+	 * @param integer $id
+	 * @param integer $numberOfDays
 	 * @return array
 	 */
 	public function getForecastByID( $id, $numberOfDays = 1 )
@@ -139,9 +155,11 @@ class Openweathermap extends APIcaller
 	/**
 	 * Seaching forecast by city name
 	 * @param string $cityname
+	 * @param integer $numberOfDays
+	 * @param string $type It can be either "like" or "accurate"
 	 * @return array
 	 */
-	public function findByCity( $cityName, $numberOfDays = 1, $type = 'like' )
+	public function findByCity( $cityName, $numberOfDays = 1, $type = '' )
 	{
 		$params = array(
 			'q'		=> $cityName,
@@ -153,29 +171,19 @@ class Openweathermap extends APIcaller
 	
 	/**
 	 * Seaching forecast by geographic coordinats
-	 * @param string $cityname
+	 * @param double $lat
+	 * @param double $lon
+	 * @param integer $numberOfDays
+	 * @param string $type It can be either "like" or "accurate"
 	 * @return array
 	 */
-	public function findByCoordinats( $lat, $lon, $numberOfDays = 1 )
+	public function findByCoordinats( $lat, $lon, $numberOfDays = 1, $type = '' )
 	{
 		$params = array(
 			'lat'	=> $lat,
 			'lon'	=> $lon,
-			'cnt'	=> $numberOfDays
-		);
-		return $this -> call( 'forecast', $params );
-	}
-		
-	/**
-	 * Seaching forecast by city ID
-	 * @param string $cityname
-	 * @return array
-	 */
-	public function findByID( $id, $numberOfDays = 1 )
-	{
-		$params = array(
-			'id'	=> $id,
-			'cnt'	=> $numberOfDays
+			'cnt'	=> $numberOfDays,
+			'type'	=> $type,
 		);
 		return $this -> call( 'forecast', $params );
 	}

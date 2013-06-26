@@ -2,18 +2,28 @@
 
 require_once 'Openweathermap.class.php';
 
-$weather = Openweathermap::getInstance( '11c1397f8a82dca91502efa87401c48d' )
-			-> setLanguage( 'pt')
-			-> setUnits( 'metric');
+/**
+ * Simple example on How to use the APIcaller to call an API
+ * 
+ * API used: http://openweathermap.org/
+ */
 
-//Current Weather
-//var_dump( $weather -> getCurrentWeatherByCity( 'London,uk' ) );
+$weather = new Openweathermap( '11c1397f8a82dca91502efa87401c48d' );
+$weather -> setLanguage( 'pt')-> setUnits( 'metric');
+
+//Getting current weather data
+var_dump( $weather -> getCurrentWeatherByCity( 'London,uk' ) );
 //var_dump( $weather -> getCurrentWeatherByCoordinats( 35, 139 ) );
 //var_dump( $weather -> getCurrentWeatherByID( 2172797 ) );
 
-//Forecast
+//Getting forecast weather data
 //var_dump( $weather -> getForecastByCity( 'London,uk' ) );
 //var_dump( $weather -> getForecastByCoordinats( 35, 139 ) );
-var_dump( $weather -> getForecastByID( 2172797, 4 ) );
+//var_dump( $weather -> getForecastByID( 2172797, 4 ) );
 
-echo $weather -> getLastCall();
+//Searching of city
+//var_dump( $weather -> getForecastByCity( 'London,uk', 10, 'accurate' ) );
+//var_dump( $weather -> getForecastByCoordinats( 57, -2.15 ) );
+
+
+var_dump( $weather -> getLastCall() );

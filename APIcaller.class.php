@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @desc 	APIcaller - Helps you build API wrappers
+ * @author 	André Filipe <andre.r.flip@gmail.com>
+ * @version 0.1.0 - 26-06-2013 21:08:49
+ *     - release into the wild
+ * 
+ * @url https://github.com/ReiDuKuduro/APIcaller
+ */
 class APIcaller
 {
 	private static $_me = null;
@@ -22,7 +30,11 @@ class APIcaller
 	 */
 	private $_method = 'GET';
 	
-	private $_lastCall = '';
+	/**
+	 * Holds the last call information
+	 * @var string
+	 */
+	private $_lastCall = array();
 	
 	public function __construct()
 	{
@@ -145,7 +157,9 @@ class APIcaller
 			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true);
 
 			$result = curl_exec( $curl );
-
+			
+			$this -> _lastCall['data']	= $result;
+			
 			curl_close($curl);
 			//*/
 		} catch( Exception $e ) {

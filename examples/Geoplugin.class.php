@@ -9,7 +9,7 @@ require_once '../APIcaller.class.php';
  * @version 0.1.0 - 26-06-2013 21:31:23
  *     - release into the wild
  * 
- * @url https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Openweathermap.class.php
+ * @url https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Geoplugin.class.php
  */
 class Geoplugin extends APIcaller
 {

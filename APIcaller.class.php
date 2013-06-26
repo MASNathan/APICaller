@@ -113,7 +113,7 @@ class APIcaller
 		$params = array_merge( $params, $this -> _defaultParams );
 		
 		try {
-			$this -> _lastCall = $this ->_api_url . $section . '?' . http_build_query( $params );
+			$this -> _lastCall = array( 'url' => $this ->_api_url . $section, 'query_string' => http_build_query( $params ) );
 			
 			$curl = curl_init();
 			
@@ -179,6 +179,10 @@ class APIcaller
     	}
 	}
 
+	/**
+	 * Returns the last call info
+	 * @return array
+	 */
 	public function getLastCall()
 	{
 		return $this -> _lastCall;

@@ -170,25 +170,19 @@ class APIcaller
 
 		switch ( json_last_error() ) {
 			case JSON_ERROR_NONE:
-				break;
+				return $data;
 	        case JSON_ERROR_DEPTH:
-	            throw new Exception("Maximum stack depth exceeded");
-	        	break;
+	            return array( 'error' => 'Maximum stack depth exceeded' );
 	        case JSON_ERROR_STATE_MISMATCH:
-	            throw new Exception("Underflow or the modes mismatch");
-	        	break;
+	            return array( 'error' => 'Underflow or the modes mismatch' );
 	        case JSON_ERROR_CTRL_CHAR:
-	            throw new Exception("Unexpected control character found");
-	        	break;
+	            return array( 'error' => 'Unexpected control character found' );
 	        case JSON_ERROR_SYNTAX:
-	            throw new Exception("Syntax error, malformed JSON");
-	        	break;
+	            return array( 'error' => 'Syntax error, malformed JSON' );
 	        case JSON_ERROR_UTF8:
-	            throw new Exception("Malformed UTF-8 characters, possibly incorrectly encoded");
-	        	break;
+	            return array( 'error' => 'Malformed UTF-8 characters, possibly incorrectly encoded' );
 	        default:
-	            throw new Exception("Unknown error on JSON file");
-	        	break;
+	            return array( 'error' => 'Unknown error on JSON file' );
     	}
 	}
 

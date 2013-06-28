@@ -84,12 +84,10 @@ class APIcaller
 	 */
 	final protected function setMethod( $method )
 	{
-		$availableMethods = array( 'GET', 'POST', 'PUT', 'DELETE' );
-		
-		if ( in_array( $method, $availableMethods ) )
+		if ( in_array( $method, array( 'GET', 'POST', 'PUT', 'DELETE' ) ) )
 			$this -> _method = $method;
 		else
-			throw new Exception( "Invalid standart communication." );
+			throw new Exception( "Invalid standard communication." );
 		
 		return self::$_me;
 	}

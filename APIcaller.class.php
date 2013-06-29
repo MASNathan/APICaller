@@ -1,12 +1,13 @@
 <?php
 
 /**
- * @desc 	APIcaller - Helps you build API wrappers
+ * APIcaller - Helps you build API wrappers
+ * 
  * @author 	André Filipe <andre.r.flip@gmail.com>
+ * @link https://github.com/ReiDuKuduro/APIcaller github repository
+ * @link http://www.phpclasses.org/package/8116-PHP-Send-requests-to-different-Web-services-APIs.html PHP Classes
  * @version 0.1.0 - 26-06-2013 21:08:49
  *     - release into the wild
- * 
- * @url https://github.com/ReiDuKuduro/APIcaller
  */
 class APIcaller
 {

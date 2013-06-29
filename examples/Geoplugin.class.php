@@ -3,13 +3,12 @@
 require_once '../APIcaller.class.php';
 
 /**
- * @desc 	Geoplugin - API Wrapper for http://www.geoplugin.com/
- * 			Simple example on How to use the APIcaller class to call an API
+ * Geoplugin - API Wrapper for http://www.geoplugin.com/, Simple example on How to use the APIcaller class to call an API
+ * 
  * @author 	André Filipe <andre.r.flip@gmail.com>
+ * @link https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Geoplugin.class.php
  * @version 0.1.0 - 26-06-2013 21:31:23
  *     - release into the wild
- * 
- * @url https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Geoplugin.class.php
  */
 class Geoplugin extends APIcaller
 {

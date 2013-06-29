@@ -3,13 +3,13 @@
 require_once '../APIcaller.class.php';
 
 /**
- * @desc 	Geoplugin - API Wrapper for http://www.geoplugin.com/
- * 			Simple example on How to use the APIcaller class to call an API
- * @author 	André Filipe <andre.r.flip@gmail.com>
- * @version 0.1.0 - 26-06-2013 21:31:23
- *     - release into the wild
+ * ShortURL - Uses either adlfy, tinyurl or y2u.be to shorten an url
  * 
- * @url https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Geoplugin.class.php
+ * @author 	André Filipe <andre.r.flip@gmail.com>
+ * @link https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/ShortURL.class.php github repository
+ * @todo Add google url shorter
+ * @version 0.1.0 - 29-06-2013 20:00:23
+ *     - release into the wild
  */
 class ShortURL extends APIcaller
 {

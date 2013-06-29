@@ -5,8 +5,8 @@ require_once 'ShortURL.class.php';
 //Example of how to use ShortURL class
 
 $urlShorter = ShortURL::getInstance()
-	-> setParam( ShortURL::SHORTENER_TYPE_ADFLY, 'key', '9c82057bc7e3deb5094d52eb9ffba184' )
-	-> setParam( ShortURL::SHORTENER_TYPE_ADFLY, 'uid', '1312770' );
+	-> setParam( ShortURL::SHORTENER_TYPE_ADFLY, 'key', 'adfly_api_key' )
+	-> setParam( ShortURL::SHORTENER_TYPE_ADFLY, 'uid', 'adfly_user_id' );
 
 $url = 'http://www.phpclasses.org/browse/author/1183559.html';
 

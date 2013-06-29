@@ -112,10 +112,11 @@ class APIcaller
 	 * Calls the API and returns the data as an Array
 	 * @param string	$section Name of the file or path you need to call
 	 * @param array		$params Params to use on the query
+	 * @param boolean	$parse If true, will parse the fetched data as a json file, if false, will return it as a string
 	 * @return array|null
 	 * @throws Exception Throws a exception if there is no URL defined
 	 */
-	protected function call( $section, $params )
+	protected function call( $section, $params, $parse = true )
 	{
 		if ( !$this -> _api_url )
 			throw new Exception( "You need to set a URL!" );
@@ -163,6 +164,9 @@ class APIcaller
 		} catch( Exception $e ) {
 			return null;
 		}
+		
+		if ( !$parse )
+			return $result;
 		
 		$data = json_decode( $result, true );
 

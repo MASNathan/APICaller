@@ -7,9 +7,10 @@ require_once '../APIcaller.class.php';
  * 
  * @author 	André Filipe <andre.r.flip@gmail.com>
  * @link https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/ShortURL.class.php github repository
- * @todo Add google url shorter
  * @version 0.1.0 - 29-06-2013 20:00:23
- *     - release into the wild
+ * 		- Release into the wild
+ * 			0.1.1 - 03-07-2013 16:14:35
+ * 		- Added google shortener
  */
 class ShortURL extends APIcaller
 {
@@ -17,7 +18,7 @@ class ShortURL extends APIcaller
 	
 	const SHORTENER_TYPE_ADFLY 		= 'adlfy';
 	const SHORTENER_TYPE_TINYURL 	= 'tinyurl';
-	//const SHORTENER_TYPE_GOOGLE 	= 'google';
+	const SHORTENER_TYPE_GOOGLE 	= 'google';
 	const SHORTENER_TYPE_YOUTUBE 	= 'youtube';
 	
 	/**
@@ -27,7 +28,7 @@ class ShortURL extends APIcaller
 	private $apis = array(
 		'adlfy'		=> 'http://api.adf.ly/api.php',
 		'tinyurl'	=> 'http://tinyurl.com/api-create.php',
-		//'google'	=> 'https://www.googleapis.com/urlshortener/v1/url',
+		'google'	=> 'https://www.googleapis.com/urlshortener/v1/url',
 		'youtube'	=> 'http://y2u.be/',
 	);
 	
@@ -131,10 +132,11 @@ class ShortURL extends APIcaller
 		if ( !isset( $params['uid'] ) || !isset( $params['key'] ) )
 			throw new Exception( 'Adf.ly "key" or "uid" are not setted.' );
 		
-		$this -> setMethod( 'GET' );
 		$this -> setUrl( $this -> apis[ self::SHORTENER_TYPE_ADFLY ] );
+		$this -> setMethod( APIcaller::APICALLER_METHOD_GET );
+		$this -> setFormat( APIcaller::APICALLER_CONTENT_TYPE_NONE );
 		
-		return $this -> call( '', $params, false );
+		return $this -> call( '', $params );
 	}
 	
 	/**
@@ -151,10 +153,11 @@ class ShortURL extends APIcaller
 		
 		$params['url'] = $url;
 		
-		$this -> setMethod( 'GET' );
 		$this -> setUrl( $this -> apis[ self::SHORTENER_TYPE_TINYURL ] );
+		$this -> setMethod( APIcaller::APICALLER_METHOD_GET );
+		$this -> setFormat( APIcaller::APICALLER_CONTENT_TYPE_NONE );
 		
-		return $this -> call( '', $params, false );
+		return $this -> call( '', $params );
 	}
 	
 	/**
@@ -176,6 +179,28 @@ class ShortURL extends APIcaller
 			throw new Exception( "The url \"$url\" doesn't contain the video id." );
 		
 		return $this -> apis[ self::SHORTENER_TYPE_YOUTUBE ] . $getInfo['v'];
+	}
+
+	/**
+	 * Uses google api to shorten the url
+	 * @param string $url
+	 * @return string
+	 */
+	private function _callGoogle( $url )
+	{
+		$this -> setUrl( $this -> apis[ self::SHORTENER_TYPE_GOOGLE ] );
+		$this -> setMethod( APIcaller::APICALLER_METHOD_POST );
+		$this -> setFormat( APIcaller::APICALLER_CONTENT_TYPE_JSON );
+		
+		$params = array( 'longUrl' => $url );
+
+		$section = '';
+		if ( isset( $this -> configs[ self::SHORTENER_TYPE_GOOGLE ] ) )
+			$section = '?' . http_build_query( $this -> configs[ self::SHORTENER_TYPE_GOOGLE ] );
+		
+		$data = $this -> call( $section, json_encode( $params ), APIcaller::APICALLER_CONTENT_TYPE_JSON );
+		
+		return $data['id'];
 	}
 }
 

@@ -6,10 +6,11 @@
  * @author 	André Filipe <andre.r.flip@gmail.com>
  * @link https://github.com/ReiDuKuduro/APIcaller github repository
  * @link http://www.phpclasses.org/package/8116-PHP-Send-requests-to-different-Web-services-APIs.html PHP Classes
- * @version 0.1.0 - 26-06-2013 21:08:49
- *     - release into the wild
- * 			0.1.1 - Added support for xml
- * 					Added support for posting xml or json data
+ * @version 0.1.0 - 26-06-2013
+ * 		- release into the wild
+ * 			0.1.1 - 03-07-2013
+ * 		- added support for xml
+ * 		- added support for posting xml or json data
  */
 class APIcaller
 {
@@ -161,10 +162,11 @@ class APIcaller
 		if ( !$this -> _api_url )
 			throw new Exception( "You need to set a URL!" );
 		
-		if ( !$contentType && !in_array( $contentType, array( 'json', 'xml' ) ) )
+		if ( $contentType && !in_array( $contentType, array( 'json', 'xml' ) ) )
 			throw new Exception( sprintf( "Content type not supported: \"%s\".", $contentType ) );
 		
-		$params = array_merge( $params, $this -> _defaultParams );
+		if ( !$contentType )
+			$params = array_merge( $params, $this -> _defaultParams );
 		
 		try {
 			$this -> _lastCall = array( 'url' => $this ->_api_url . $section, 'params' => $params );
@@ -180,7 +182,6 @@ class APIcaller
 						/**
 						 * @todo if the $params is an array, generate the json or the xml string
 						 */
-						curl_setopt( $curl, CURLOPT_MUTE, true);
 						curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, false);
 						curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false);
 						curl_setopt( $curl, CURLOPT_HTTPHEADER, $this -> _getContentType( $contentType ) );
@@ -241,9 +242,6 @@ class APIcaller
 	 */
 	private function _parseJson( $string )
 	{
-		if ( !is_string( $string ) )
-			throw new Exception( "Invalid string value" );
-			
 		$data = json_decode( $string, true );
 
 		switch ( json_last_error() ) {
@@ -271,9 +269,6 @@ class APIcaller
 	 */
 	private function _parseXml( $string )
 	{
-		if ( !is_string( $string ) )
-			throw new Exception( "Invalid string value" );
-		
 		return $this -> _parseJson( json_encode( (array) simplexml_load_string( $string ) ), true );
 	}
 	
@@ -295,10 +290,11 @@ class APIcaller
 	{
 		switch ( $contentType ) {
 			case 'xml':
-				array( 'Content-Type: text/xml' );
+				return array( 'Content-Type: text/xml' );
 			break;
+			
 			case 'json':
-				array( 'Content-Type: application/json' );
+				return array( 'Content-Type: application/json' );
 			break;
 			
 			default:

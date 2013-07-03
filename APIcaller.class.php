@@ -8,6 +8,8 @@
  * @link http://www.phpclasses.org/package/8116-PHP-Send-requests-to-different-Web-services-APIs.html PHP Classes
  * @version 0.1.0 - 26-06-2013 21:08:49
  *     - release into the wild
+ * 			0.1.1 - Added support for xml
+ * 					Added support for posting xml or json data
  */
 class APIcaller
 {
@@ -36,6 +38,12 @@ class APIcaller
 	 * @var string
 	 */
 	private $_lastCall = array();
+	
+	/**
+	 * Data format that the api you are calling will return to be parsed
+	 * @var string [none|json|xml] 
+	 */
+	private $_format = 'json'; 
 	
 	public function __construct()
 	{
@@ -110,22 +118,41 @@ class APIcaller
 	}
 	
 	/**
+	 * Sets the Format of the retrieved data to be parsed
+	 * @param string 	$format
+	 * @return obj Returns itself
+	 * @throws Exception If format is not valid
+	 */
+	final protected function setFormat( $format )
+	{
+		if ( !in_array( $format, array( 'none', 'json', 'xml' ) ) )
+			throw new Exception( sprintf( "APIcaller doesn't support '%s' format.", $format ) );
+		
+		$this -> _format = $format;
+		
+		return self::$_me;
+	}
+	
+	/**
 	 * Calls the API and returns the data as an Array
 	 * @param string	$section Name of the file or path you need to call
-	 * @param array		$params Params to use on the query
-	 * @param boolean	$parse If true, will parse the fetched data as a json file, if false, will return it as a string
+	 * @param array|string $params Params to use on the query or the xml/json string you want to POST
+	 * @param string	$contentType Content type of the data you want to POST
 	 * @return array|null
 	 * @throws Exception Throws a exception if there is no URL defined
 	 */
-	protected function call( $section, $params, $parse = true )
+	protected function call( $section, $params, $contentType = null )
 	{
 		if ( !$this -> _api_url )
 			throw new Exception( "You need to set a URL!" );
 		
+		if ( !$contentType && !in_array( $contentType, array( 'json', 'xml' ) ) )
+			throw new Exception( sprintf( "Content type not supported: \"%s\".", $contentType ) );
+		
 		$params = array_merge( $params, $this -> _defaultParams );
 		
 		try {
-			$this -> _lastCall = array( 'url' => $this ->_api_url . $section, 'query_string' => http_build_query( $params ) );
+			$this -> _lastCall = array( 'url' => $this ->_api_url . $section, 'params' => $params );
 			
 			$curl = curl_init();
 			
@@ -133,7 +160,19 @@ class APIcaller
 				case 'POST':
 					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
 					curl_setopt( $curl, CURLOPT_POST, true );
-					curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+					
+					if ( is_string( $params ) && !is_null( $contentType ) ) {
+						/**
+						 * @todo if the $params is an array, generate the json or the xml string
+						 */
+						curl_setopt( $curl, CURLOPT_MUTE, true);
+						curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, false);
+						curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false);
+						curl_setopt( $curl, CURLOPT_HTTPHEADER, $this -> _getContentType( $contentType ) );
+						curl_setopt( $curl, CURLOPT_POSTFIELDS, $params );
+					} else { //Regular POST
+						curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+					}
 				break;
 				
 				case 'PUT':
@@ -161,15 +200,36 @@ class APIcaller
 			$this -> _lastCall['data']	= $result;
 			
 			curl_close($curl);
-			//*/
 		} catch( Exception $e ) {
 			return null;
 		}
 		
-		if ( !$parse )
-			return $result;
-		
-		$data = json_decode( $result, true );
+		switch ( $this -> _format ) {
+			case 'json':
+				return $this -> _parseJson( $result );
+			break;
+			
+			case 'xml':
+				return $this -> _parseXml( $result );
+			break;
+			
+			default:
+				return $result;
+			break;
+		}
+	}
+
+	/**
+	 * Parses a json string into an array
+	 * @param string	$string
+	 * @return array
+	 */
+	private function _parseJson( $string )
+	{
+		if ( !is_string( $string ) )
+			throw new Exception( "Invalid string value" );
+			
+		$data = json_decode( $string, true );
 
 		switch ( json_last_error() ) {
 			case JSON_ERROR_NONE:
@@ -188,7 +248,20 @@ class APIcaller
 	            return array( 'error' => 'Unknown error on JSON file' );
     	}
 	}
-
+	
+	/**
+	 * Parses a xml string into an array
+	 * @param string	$string
+	 * @return array
+	 */
+	private function _parseXml( $string )
+	{
+		if ( !is_string( $string ) )
+			throw new Exception( "Invalid string value" );
+		
+		return $this -> _parseJson( json_encode( (array) simplexml_load_string( $string ) ), true );
+	}
+	
 	/**
 	 * Returns the last call info
 	 * @return array
@@ -196,5 +269,26 @@ class APIcaller
 	public function getLastCall()
 	{
 		return $this -> _lastCall;
+	}
+	
+	/**
+	 * Returns the content type string to add to the header
+	 * @param string 	$contentType
+	 * @return array
+	 */
+	private function _getContentType( $contentType )
+	{
+		switch ( $contentType ) {
+			case 'xml':
+				array( 'Content-Type: text/xml' );
+			break;
+			case 'json':
+				array( 'Content-Type: application/json' );
+			break;
+			
+			default:
+				return array();
+			break;
+		}
 	}
 }

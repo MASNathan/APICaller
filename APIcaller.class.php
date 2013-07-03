@@ -16,6 +16,21 @@ class APIcaller
 	private static $_me = null;
 	
 	/**
+	 * Supported Content types, 'none' isn't actually a content type itself but you get the idea
+	 */
+	const APICALLER_CONTENT_TYPE_NONE 	= 'none';
+	const APICALLER_CONTENT_TYPE_JSON 	= 'json';
+	const APICALLER_CONTENT_TYPE_XML 	= 'xml';
+	
+	/**
+	 * Communication standards allowed
+	 */
+	 const APICALLER_METHOD_GET			= 'GET';
+	 const APICALLER_METHOD_POST		= 'POST';
+	 const APICALLER_METHOD_PUT			= 'PUT';
+	 const APICALLER_METHOD_DELETE		= 'DELETE';
+	
+	/**
 	 * Var that holds all the default params
 	 * @var array
 	 */
@@ -31,7 +46,7 @@ class APIcaller
 	 * Method to use on the call
 	 * @var string
 	 */
-	private $_method = 'GET';
+	private $_method = APIcaller::APICALLER_METHOD_GET;
 	
 	/**
 	 * Holds the last call information
@@ -43,8 +58,8 @@ class APIcaller
 	 * Data format that the api you are calling will return to be parsed
 	 * @var string [none|json|xml] 
 	 */
-	private $_format = 'json'; 
-	
+	private $_format = APIcaller::APICALLER_CONTENT_TYPE_JSON;
+		
 	public function __construct()
 	{
 	}

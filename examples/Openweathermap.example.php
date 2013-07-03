@@ -11,6 +11,7 @@ require_once 'Openweathermap.class.php';
 $weather = new Openweathermap( 'api_key' );
 $weather -> setLanguage( 'pt')-> setUnits( 'metric');
 
+echo '<pre>';
 //Getting current weather data
 var_dump( $weather -> getCurrentWeatherByCity( 'London,uk' ) );
 //var_dump( $weather -> getCurrentWeatherByCoordinats( 35, 139 ) );
@@ -27,3 +28,5 @@ var_dump( $weather -> getCurrentWeatherByCity( 'London,uk' ) );
 
 
 var_dump( $weather -> getLastCall() );
+
+echo '</pre>';

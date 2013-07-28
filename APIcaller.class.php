@@ -5,7 +5,7 @@
  * 
  * @author 	André Filipe <andre.r.flip@gmail.com>
  * @link https://github.com/ReiDuKuduro/APIcaller github repository
- * @link http://www.phpclasses.org/package/8116-PHP-Send-requests-to-different-Web-services-APIs.html PHP Classes
+ * @link http://masnathan.users.phpclasses.org/package/8116-PHP-Send-requests-to-different-Web-services-APIs.html PHP Classes
  * @version 0.1.0 - 26-06-2013
  * 		- release into the wild
  * 			0.1.1 - 03-07-2013

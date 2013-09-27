@@ -313,7 +313,7 @@ class APIcaller
 		}
 	}
 
-	public static function get()
+	final public static function get()
 	{
 		if (func_num_args() == 0) {
 			throw new InvalidArgsException("You need specify at least the URL to call");
@@ -361,17 +361,17 @@ class APIcaller
 		return $data;
 	}
 
-	public static function post()
+	final public static function post()
 	{
 
 	}
 
-	public static function put()
+	final public static function put()
 	{
 
 	}
 
-	public static function delete()
+	final public static function delete()
 	{
 
 	}

@@ -6,22 +6,16 @@
  * @author 	André Filipe <andre.r.flip@gmail.com>
  * @link https://github.com/ReiDuKuduro/APIcaller github repository
  * @link http://masnathan.users.phpclasses.org/package/8116-PHP-Send-requests-to-different-Web-services-APIs.html PHP Classes
- * @version 0.1.0 - 26-06-2013
- * 		- release into the wild
- * 			0.1.1 - 03-07-2013
- * 		- added support for xml
- * 		- added support for posting xml or json data
+ * @version 0.2.0
  */
 class APIcaller
 {
-	private static $_me = null;
-	
 	/**
 	 * Supported Content types, 'none' isn't actually a content type itself but you get the idea
 	 */
-	const APICALLER_CONTENT_TYPE_NONE 	= 'none';
-	const APICALLER_CONTENT_TYPE_JSON 	= 'json';
-	const APICALLER_CONTENT_TYPE_XML 	= 'xml';
+	const CONTENT_TYPE_NONE = 'none';
+	const CONTENT_TYPE_JSON = 'json';
+	const CONTENT_TYPE_XML 	= 'xml';
 	
 	/**
 	 * Communication standards allowed
@@ -61,24 +55,13 @@ class APIcaller
 	 */
 	private $_format = APIcaller::APICALLER_CONTENT_TYPE_JSON;
 	
-	static private $opts_get = array(
+	private static $opts_get = array(
 
 	);
 
 	public function __construct()
 	{
-	}
-	
-	/**
-	 * Returns itself
-	 * @return obj
-	 */
-	static public function getInstance()
-	{
-		if ( !self::$_me instanceof APIcaller )
-			self::$_me = new self();
-		
-		return self::$_me;
+		//do stuff
 	}
 	
 	/**
@@ -244,39 +227,7 @@ class APIcaller
 	 * @param string	$string
 	 * @return array
 	 */
-	private function _parseJson( $string )
-	{
-		$data = json_decode( $string, true );
-
-		switch ( json_last_error() ) {
-			case JSON_ERROR_NONE:
-				return $data;
-	        case JSON_ERROR_DEPTH:
-	            return array( 'error' => 'Maximum stack depth exceeded' );
-	        case JSON_ERROR_STATE_MISMATCH:
-	            return array( 'error' => 'Underflow or the modes mismatch' );
-	        case JSON_ERROR_CTRL_CHAR:
-	            return array( 'error' => 'Unexpected control character found' );
-	        case JSON_ERROR_SYNTAX:
-	            return array( 'error' => 'Syntax error, malformed JSON' );
-	        case JSON_ERROR_UTF8:
-	            return array( 'error' => 'Malformed UTF-8 characters, possibly incorrectly encoded' );
-	        default:
-	            return array( 'error' => 'Unknown error on JSON file' );
-    	}
-	}
-	
-	/**
-	 * Parses a xml string into an array
-	 * @param string	$string
-	 * @return array
-	 */
-	private function _parseXml( $string )
-	{
-		return $this -> _parseJson( json_encode( (array) simplexml_load_string( $string ) ), true );
-	}
-	
-	static private function parseJson($str)
+	private static function parseJson($str)
 	{
 		$data = json_decode($str, true);
 
@@ -298,9 +249,37 @@ class APIcaller
     	}
 	}
 
-	static private function parseXml($str)
+	/**
+	 * Parses a xml string into an array
+	 * @param string	$string
+	 * @return array
+	 */
+	private static function parseXml($str)
 	{
 		return self::parseJson(json_encode((array) simplexml_load_string($str), true));
+	}
+
+	/**
+	 * Parses the data passed into the requested data type
+	 * @param string	$string
+	 * @param string	$data_type You can use one of the following constants APIcaller::CONTENT_TYPE_JSON, APIcaller::CONTENT_TYPE_XML, APIcaller::CONTENT_TYPE_NONE
+	 * @return array
+	 */
+	private static function parseData($str, $data_type)
+	{
+		switch ($data_type) {
+			case self::CONTENT_TYPE_JSON:
+				return self::parseJson($str);
+			break;
+			
+			case self::CONTENT_TYPE_XML:
+				return self::parseXml($str);
+			break;
+
+			default:
+				return $str;
+			break;
+		}
 	}
 
 	/**
@@ -334,22 +313,46 @@ class APIcaller
 		}
 	}
 
-	static public function get($url, $params = array(), $callback = null, $data_type = 'string')
+	public static function get()
 	{
+		if (func_num_args() == 0) {
+			throw new InvalidArgsException("You need specify at least the URL to call");
+		}
+
+		$data      = func_get_args();
+		$url       = null;
+		$params    = null;
+		$callback  = null;
+		$data_type = 'string';
+
+		if (!is_string($data[0]) || !filter_var($data[0], FILTER_VALIDATE_URL)) {
+			throw new InvalidArgsException("The URL you specified is not valid.");
+		} else {
+			$url = array_shift($data);
+		}
+
+		//Is there any parameters to add?
+		if (count($data) > 0 && is_array($data[0])) {
+			$params = array_shift($data);
+		}
+		
+		//Is there any callback function to call?
+		if (count($data) > 0 && is_callable($data[0])) {
+			$callback = array_shift($data);
+		}
+		
+		//Is there any data type?
+		if (count($data) > 0 && is_string($data[0])) {
+			$data_type = array_shift($data);
+		}
+
+		if (!is_null($params)) {
+			$url .= '?' . http_build_query($params);
+		}
+		
 		$data = self::curl_it($url);
 
-		switch ($data_type) {
-			case 'json':
-				$data = self::parseJson($data);
-			break;
-			
-			case 'xml':
-				$data = self::parseXml($data);
-			break;
-			
-			default:
-			break;
-		}
+		$data = self::parseData($data, $data_type);
 
 		if (!is_null($callback)) {
 			$data = $callback($data);
@@ -358,7 +361,22 @@ class APIcaller
 		return $data;
 	}
 
-	static private function curl_it($url, $opts = array())
+	public static function post()
+	{
+
+	}
+
+	public static function put()
+	{
+
+	}
+
+	public static function delete()
+	{
+
+	}
+
+	private static function curl_it($url, $opts = array())
 	{
 		$curl = curl_init();
 		

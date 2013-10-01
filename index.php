@@ -2,61 +2,16 @@
 
 require_once 'APIcaller.php';
 
-$url = 'http://test.local/api.php';
-/*
-$x = APIcaller::get($url . 'data.xml', function($data) {
-	var_dump($data);
-}, 'xml');
-//*/
+APIcaller::get('http://www.geoplugin.net/json.gp', function($data) {
+	$tmp = '';
+	foreach ($data as $key => $value) {
+		$tmp .= sprintf("<tr><td>%s</td><td>%s</td></tr>", $key, $value);
+	}
 
-echo '<pre>';
-
-$x = APIcaller::post($url, array('x' => '007'), function($data) {
-	?>
-		<fieldset>
-			<legend><?= $data['method'] ?></legend>
-			<pre><?php print_r($data['data']) ?></pre>
-		</fieldset>
-	<?php
-
-	return $data;
-}, 'json');
-
-$x = APIcaller::put($url, array('x' => '007'), function($data) {
-	?>
-		<fieldset>
-			<legend><?= $data['method'] ?></legend>
-			<pre><?php print_r($data['data']) ?></pre>
-		</fieldset>
-	<?php
-
-	return $data;
-}, 'json');
-
-$x = APIcaller::delete($url, array('x' => '007'), function($data) {
-	?>
-		<fieldset>
-			<legend><?= $data['method'] ?></legend>
-			<pre><?php print_r($data['data']) ?></pre>
-		</fieldset>
-	<?php
-
-	return $data;
-}, 'json');
-
-$x = APIcaller::get($url, array('x' => '007'), function($data) {
-	?>
-		<fieldset>
-			<legend><?= $data['method'] ?></legend>
-			<pre><?php print_r($data['data']) ?></pre>
-		</fieldset>
-	<?php
-
-	return $data;
+	echo sprintf("<table border='1'><tr><th>key</th><th>value</th></tr>%s</table>", $tmp);
 }, 'json');
 
 
-
-echo '<br>';
-
-//var_dump($x);
+APIcaller::post('http://tinyurl.com/api-create.php', array('url' => 'http://www.phpclasses.org/browse/author/1183559.html'), function($data) {
+	echo sprintf('<a href="%s" target="__blank">%s</a><br /><br />', $data, $data);
+});

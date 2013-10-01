@@ -91,6 +91,12 @@ class APIcaller
 		CURLOPT_CUSTOMREQUEST => self::METHOD_DELETE,
 	);
 
+	/**
+	 * Allows you to set the default URL, call method and the parse format if any
+	 * @param string $url The API URL
+	 * @param string $method The Request Standard you want to use [GET|POST|PUT|DELETE]
+	 * @param string $format The format of the data the webservice will return [none|json|xml]
+	 */
 	public function __construct($url = null, $method = null, $format = null)
 	{
 		if (!is_null($url)) {
@@ -134,7 +140,7 @@ class APIcaller
 	 * @return obj Returns itself
 	 * @throws InvalidMethodException If method is not valid
 	 */
-	final protected function setMethod( $method )
+	final protected function setMethod($method)
 	{
 		if (in_array($method, array(self::METHOD_GET, self::METHOD_POST, self::METHOD_PUT, self::METHOD_DELETE))) {
 			$this->default_method = $method;
@@ -151,7 +157,7 @@ class APIcaller
 	 * @return obj Returns itself
 	 * @throws InvalidUrlException If URL is not valid
 	 */
-	final protected function setUrl( $url )
+	final protected function setUrl($url)
 	{
 		if (!filter_var($url, FILTER_VALIDATE_URL)) {
 			throw new InvalidUrlException;
@@ -168,9 +174,9 @@ class APIcaller
 	 * @return obj Returns itself
 	 * @throws InvalidContentTypeException If format is not valid
 	 */
-	final protected function setFormat( $format )
+	final protected function setFormat($format)
 	{
-		if (!in_array($format, array(self::CONTENT_TYPE_NONE, slef::CONTENT_TYPE_JSON, self::CONTENT_TYPE_XML))) {
+		if (!in_array($format, array(self::CONTENT_TYPE_NONE, self::CONTENT_TYPE_JSON, self::CONTENT_TYPE_XML))) {
 			throw new InvalidContentTypeException(sprintf( "APIcaller doesn't support '%s' format.", $format));
 		} else {
 			$this->default_format = $format;	
@@ -230,7 +236,7 @@ class APIcaller
 
 
 					} else { //Regular POST
-						$data = self::post($this->api_url . $section, $params,);
+						$data = self::post($this->api_url . $section, $params);
 					}
 					break;
 				

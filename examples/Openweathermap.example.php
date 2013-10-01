@@ -9,7 +9,7 @@ require_once 'Openweathermap.class.php';
  */
 
 $weather = new Openweathermap( 'api_key' );
-$weather -> setLanguage( 'pt')-> setUnits( 'metric');
+$weather->setLanguage('pt')->setUnits('metric');
 
 echo '<pre>';
 //Getting current weather data

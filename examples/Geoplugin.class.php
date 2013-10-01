@@ -1,39 +1,25 @@
 <?php
 
-require_once '../APIcaller.class.php';
+require_once '../APIcaller.php';
 
 /**
  * Geoplugin - API Wrapper for http://www.geoplugin.com/, Simple example on How to use the APIcaller class to call an API
  * 
  * @author 	André Filipe <andre.r.flip@gmail.com>
  * @link https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Geoplugin.class.php
- * @version 0.1.0 - 26-06-2013 21:31:23
- *     - release into the wild
+ * @version 0.1.1 - now supports the 0.2.0 version of APIcaller
+ *          0.1.0 - release into the wild
  */
 class Geoplugin extends APIcaller
 {
-	private static $_me = null;
-	
-	function __construct( $apiid = '' )
+
+	function __construct()
 	{
-		parent::__construct();
-		
-		$this -> setMethod( 'GET' );
-		$this -> setUrl( 'http://www.geoplugin.net/' );
-		
-		self::$_me = $this;
-	}
-	
-	/**
-	 * Returns itself
-	 * @return obj
-	 */
-	static public function getInstance()
-	{
-		if ( !self::$_me instanceof Geoplugin )
-			self::$_me = new self();
-		
-		return self::$_me;
+		parent::__construct(
+			'http://www.geoplugin.net/', 
+			APIcaller::METHOD_GET,
+			APIcaller::CONTENT_TYPE_JSON
+		);
 	}
 	
 	/**
@@ -42,10 +28,10 @@ class Geoplugin extends APIcaller
 	 * @param string $baseCurrency i.e.: "EUR"
 	 * @return array
 	 */
-	public function getLocation( $ip = '', $baseCurrency = '', $renameArrayKeys = false )
+	public function getLocation($ip = '', $baseCurrency = '', $renameArrayKeys = false)
 	{
 		$params = array(
-			'ip'	=> !$ip ? $_SERVER['REMOTE_ADDR'] : $ip,
+			'ip'            => !$ip ? $_SERVER['REMOTE_ADDR'] : $ip,
 			'base_currency'	=> $baseCurrency,
 		);
 		

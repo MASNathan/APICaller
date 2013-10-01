@@ -1,44 +1,40 @@
 <?php
 
-require_once '../APIcaller.class.php';
+require_once '../APIcaller.php';
 
 /**
  * Openweathermap - API Wrapper for http://openweathermap.org/, Simple example on How to use the APIcaller class to call an API
  * 
  * @author 	André Filipe <andre.r.flip@gmail.com>
- * @link https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Openweathermap.class.php github repository
- * @version 0.1.0 - 26-06-2013 21:06:00
- *     - release into the wild
+ * @link    https://github.com/ReiDuKuduro/APIcaller/blob/master/examples/Openweathermap.class.php github repository
+ * @version 0.1.1 - now supports the 0.2.0 version of APIcaller
+ *          0.1.0 - release into the wild
  * 
  */
 class Openweathermap extends APIcaller
 {
-	private static $_me = null;
-	
-	function __construct( $apiid = '' )
-	{
-		parent::__construct();
-		
-		$this -> setMethod( 'GET' );
-		$this -> setUrl( 'http://api.openweathermap.org/data/2.5/' );
-		//Default values will be always added to the URL
-		if ( $apiid )
-			$this -> setDefault( 'APPID', 	$apiid );
-		$this -> setDefault( 'mode', 	'json' );
-		
-		self::$_me = $this;
-	}
 	
 	/**
-	 * Returns itself
-	 * @return obj
+	 * Openweathermap class constructor
+	 * @param string $apiid
 	 */
-	static public function getInstance()
+	function __construct($apiid = '')
 	{
-		if ( !self::$_me instanceof Openweathermap )
-			self::$_me = new self();
+		parent::__construct(
+			'http://api.openweathermap.org/data/2.5/', 
+			APIcaller::METHOD_GET, 
+			APIcaller::CONTENT_TYPE_JSON
+		);
 		
-		return self::$_me;
+		//$this->setUrl('http://api.openweathermap.org/data/2.5/');
+		//$this->setMethod(APIcaller::METHOD_GET);
+		//$this->setFormat(APIcaller::CONTENT_TYPE_JSON);
+		
+		//Default values will be always added to the URL
+		if ($apiid) {
+			$this->setDefault('APPID', $apiid);
+		}
+		$this->setDefault('mode', 'json');
 	}
 	
 	/**
@@ -46,10 +42,10 @@ class Openweathermap extends APIcaller
 	 * @param string $lang
 	 * @return obj Returns itself
 	 */
-	public function setLanguage( $lang )
+	public function setLanguage($lang)
 	{
-		$this -> setDefault( 'lang', $lang );
-		return self::$_me;
+		$this->setDefault('lang', $lang);
+		return $this;
 	}
 	
 	/**
@@ -57,10 +53,10 @@ class Openweathermap extends APIcaller
 	 * @param string $lang It can be either "internal", "metric" or "imperial"
 	 * @return obj Returns itself
 	 */
-	public function setUnits( $units )
+	public function setUnits($units)
 	{
-		$this -> setDefault( 'units', $units );
-		return self::$_me;
+		$this->setDefault('units', $units);
+		return $this;
 	}
 	
 	/**

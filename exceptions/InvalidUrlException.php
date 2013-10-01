@@ -1,0 +1,20 @@
+<?php
+/**
+ * Exception used when the comunication standard is invalid 
+ *
+ * @package	APIcaller
+ * @subpackage exceptions
+ * @author	André Filipe <andre.r.flip@gmail.com>
+ * @license	MIT
+ * @version	0.2.0
+ */
+class InvalidUrlException extends Exception
+{
+	public function __construct($message = '', $code = 0, $previous = null) {
+
+    	if (!$message) {
+       		$message = "Invalid URL.";
+    	}
+        parent::__construct($message, $code, $previous);
+    }
+}

@@ -1,5 +1,5 @@
 /**
- * APIcaller.class.php
+ * APIcaller.php
  * This package can send requests to different Web services APIs.
  * There is a base class that can send HTTP requests to given API URLs, retrieve the results and return decoded JSON responses.
  * Implementation sub-classes can send requests to several types of API Web services.

@@ -1,5 +1,11 @@
 <?php
 
+//Loading the exceptions
+require_once __DIR__ . "/exceptions/InvalidArgsException.php";
+require_once __DIR__ . "/exceptions/InvalidContentTypeException.php";
+require_once __DIR__ . "/exceptions/InvalidMethodException.php";
+require_once __DIR__ . "/exceptions/InvalidUrlException.php";
+
 /**
  * APIcaller - Helps you build API wrappers
  * 
@@ -20,61 +26,95 @@ class APIcaller
 	/**
 	 * Communication standards allowed
 	 */
-	 const APICALLER_METHOD_GET			= 'GET';
-	 const APICALLER_METHOD_POST		= 'POST';
-	 const APICALLER_METHOD_PUT			= 'PUT';
-	 const APICALLER_METHOD_DELETE		= 'DELETE';
-	
-	/**
-	 * Var that holds all the default params
-	 * @var array
-	 */
-	private $_defaultParams = array();
+	 const METHOD_GET    = 'GET';
+	 const METHOD_POST   = 'POST';
+	 const METHOD_PUT    = 'PUT';
+	 const METHOD_DELETE = 'DELETE';
 	
 	/**
 	 * Url of the API to call
 	 * @var string
 	 */
-	private $_api_url = '';
+	private $api_url = null;
+
+	/**
+	 * Var that holds all the default params
+	 * @var array
+	 */
+	private $default_params = array();
 	
 	/**
 	 * Method to use on the call
 	 * @var string
 	 */
-	private $_method = APIcaller::APICALLER_METHOD_GET;
-	
-	/**
-	 * Holds the last call information
-	 * @var string
-	 */
-	private $_lastCall = array();
+	private $default_method = APIcaller::METHOD_GET;
 	
 	/**
 	 * Data format that the api you are calling will return to be parsed
 	 * @var string [none|json|xml] 
 	 */
-	private $_format = APIcaller::APICALLER_CONTENT_TYPE_JSON;
+	private $default_format = APIcaller::CONTENT_TYPE_NONE;
 	
-	private static $opts_get = array(
+	/**
+	 * Holds the last call information
+	 * @var string
+	 */
+	private $last_call = array();
+	
+	/**
+	 * CURL default options for GET calls
+	 * @var array
+	 */
+	private static $opts_get    = array();
 
+	/**
+	 * CURL default options for POST calls
+	 * @var array
+	 */
+	private static $opts_post   = array(
+		CURLOPT_POST          => true,
 	);
 
-	public function __construct()
+	/**
+	 * CURL default options for PUT calls
+	 * @var array
+	 */
+	private static $opts_put    = array(
+		CURLOPT_CUSTOMREQUEST => self::METHOD_PUT,
+	);
+
+	/**
+	 * CURL default options for DELETE calls
+	 * @var array
+	 */
+	private static $opts_delete = array(
+		CURLOPT_CUSTOMREQUEST => self::METHOD_DELETE,
+	);
+
+	public function __construct($url = null, $method = null, $format = null)
 	{
-		//do stuff
+		if (!is_null($url)) {
+			$this->setUrl($url);
+		}
+		if (!is_null($method)) {
+			$this->setMethod($method);
+		}
+		if (!is_null($format)) {
+			$this->setFormat($format);
+		}
 	}
 	
 	/**
 	 * Sets a default parameter
 	 * @param string	$param
-	 * @param string|integer|double
+	 * @param string|integer|double $value
 	 * @return obj Returns itself
 	 */
-	final protected function setDefault( $param, $value )
+	final protected function setDefault($param, $value)
 	{
-		$this -> _defaultParams[ $param ] = $value;
+		$this->default_params[$param] = $value;
 		
-		return self::$_me;
+		return $this;
 	}
 	
 	/**
@@ -83,141 +123,165 @@ class APIcaller
 	 */
 	final protected function clearDefaults()
 	{
-		$this -> _defaultParams = array();
+		$this->default_params = array();
 		
-		return self::$_me;
+		return $this;
 	}
 
 	/**
 	 * Sets the Method to use when calling the API
 	 * @param string 	$method [ GET | POST | PUT | DELETE ]
 	 * @return obj Returns itself
-	 * @throws Exception If method is not valid
+	 * @throws InvalidMethodException If method is not valid
 	 */
 	final protected function setMethod( $method )
 	{
-		if ( in_array( $method, array( 'GET', 'POST', 'PUT', 'DELETE' ) ) )
-			$this -> _method = $method;
-		else
-			throw new Exception( "Invalid standard communication." );
-		
-		return self::$_me;
+		if (in_array($method, array(self::METHOD_GET, self::METHOD_POST, self::METHOD_PUT, self::METHOD_DELETE))) {
+			$this->default_method = $method;
+		} else {
+			throw new InvalidMethodException;
+		}
+
+		return $this;
 	}
 	
 	/**
 	 * Sets the URL of the API
 	 * @param string	$url
 	 * @return obj Returns itself
-	 * @throws Exception If URL is not valid
+	 * @throws InvalidUrlException If URL is not valid
 	 */
 	final protected function setUrl( $url )
 	{
-		if ( !filter_var($url, FILTER_VALIDATE_URL) )
-			throw new Exception( "Invalid URL" );
+		if (!filter_var($url, FILTER_VALIDATE_URL)) {
+			throw new InvalidUrlException;
+		} else {
+			$this->api_url = $url;
+		}
 		
-		$this -> _api_url = $url;
-		
-		return self::$_me;
+		return $this;
 	}
 	
 	/**
 	 * Sets the Format of the retrieved data to be parsed
-	 * @param string 	$format
+	 * @param string 	$format Can be one of the following APIcaller::CONTENT_TYPE_NONE, APIcaller::CONTENT_TYPE_JSON or APIcaller::CONTENT_TYPE_XML
 	 * @return obj Returns itself
-	 * @throws Exception If format is not valid
+	 * @throws InvalidContentTypeException If format is not valid
 	 */
 	final protected function setFormat( $format )
 	{
-		if ( !in_array( $format, array( 'none', 'json', 'xml' ) ) )
-			throw new Exception( sprintf( "APIcaller doesn't support '%s' format.", $format ) );
-		
-		$this -> _format = $format;
-		
-		return self::$_me;
+		if (!in_array($format, array(self::CONTENT_TYPE_NONE, slef::CONTENT_TYPE_JSON, self::CONTENT_TYPE_XML))) {
+			throw new InvalidContentTypeException(sprintf( "APIcaller doesn't support '%s' format.", $format));
+		} else {
+			$this->default_format = $format;	
+		}
+
+		return $this;
 	}
 	
 	/**
 	 * Calls the API and returns the data as an Array
 	 * @param string	$section Name of the file or path you need to call
 	 * @param array|string $params Params to use on the query or the xml/json string you want to POST
-	 * @param string	$contentType Content type of the data you want to POST
+	 * @param string	$content_type Content type of the data you want to POST
 	 * @return array|null
-	 * @throws Exception Throws a exception if there is no URL defined
+	 * @throws InvalidUrlException Throws a exception if there is no URL defined
+	 * @throws InvalidContentTypeException Throws a exception if the content type is not supported
 	 */
-	protected function call( $section, $params, $contentType = null )
+	protected function call( $section, $params, $content_type = null )
 	{
-		if ( !$this -> _api_url )
-			throw new Exception( "You need to set a URL!" );
-		
-		if ( $contentType && !in_array( $contentType, array( 'json', 'xml' ) ) )
-			throw new Exception( sprintf( "Content type not supported: \"%s\".", $contentType ) );
-		
-		if ( !$contentType )
-			$params = array_merge( $params, $this -> _defaultParams );
+		if (!$this->api_url) {
+			throw new InvalidUrlException("You need to set a URL!");
+		}
+
+		if ($content_type && !in_array($content_type, array(self::CONTENT_TYPE_JSON, self::CONTENT_TYPE_XML))) {
+			throw new InvalidContentTypeException(sprintf("Content type not supported: \"%s\".", $content_type));
+		}
+
+		if (!$content_type) {
+			$params = array_merge($params, $this->default_params);
+		}
 		
 		try {
-			$this -> _lastCall = array( 'url' => $this ->_api_url . $section, 'params' => $params );
+			$this->last_call = array(
+				'url'    => $this->api_url . $section,
+				'params' => $params,
+			);
 			
-			$curl = curl_init();
-			
-			switch ( $this -> _method ) {
-				case 'POST':
-					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
-					curl_setopt( $curl, CURLOPT_POST, true );
-					
-					if ( is_string( $params ) && !is_null( $contentType ) ) {
+			switch ($this->default_method) {
+				case self::METHOD_GET:
+					$data = self::get($this->api_url . $section, $params);
+					break;
+
+				case self::METHOD_POST:
+					if (is_string($params) && !is_null($content_type)) {
 						/**
 						 * @todo if the $params is an array, generate the json or the xml string
 						 */
-						curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, false);
-						curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false);
-						curl_setopt( $curl, CURLOPT_HTTPHEADER, $this -> _getContentType( $contentType ) );
-						curl_setopt( $curl, CURLOPT_POSTFIELDS, $params );
+						$opts = array(
+							CURLOPT_POST           => true,
+							CURLOPT_SSL_VERIFYHOST => false,
+							CURLOPT_SSL_VERIFYPEER => false,
+							CURLOPT_HTTPHEADER     => $this->getContentType($content_type),
+							CURLOPT_POSTFIELDS     => $params,
+						);
+
+						$data = self::curl_it();
+
+
 					} else { //Regular POST
-						curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+						$data = self::post($this->api_url . $section, $params,);
 					}
-				break;
+					break;
 				
-				case 'PUT':
-					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
-					curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'PUT' );
-					curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
-				break;
+				case self::METHOD_PUT:
+					$data = self::put($this->api_url . $section, $params);
+					break;
 				
-				case 'DELETE':
-					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section );
-					curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'DELETE' );
-					curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $params ) );
-				break;
+				case self::METHOD_DELETE:
+					$data = self::delete($this->api_url . $section, $params);
+					break;
 				
-				default: //GET
-					curl_setopt( $curl, CURLOPT_URL, $this ->_api_url . $section . '?' . http_build_query( $params ) );
-				break;
+				default:
+					throw new InvalidMethodException;
+					break;
 			}
 			
-			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5 );
-			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true);
-
-			$result = curl_exec( $curl );
-			
-			$this -> _lastCall['data']	= $result;
-			
-			curl_close($curl);
-		} catch( Exception $e ) {
+			$this->last_call['data'] = $data;
+		} catch(Exception $e) {
 			return null;
 		}
 		
-		switch ( $this -> _format ) {
-			case 'json':
-				return $this -> _parseJson( $result );
+		return self::parseData($data, $this->default_format);
+	}
+
+	/**
+	 * Returns the last call info
+	 * @return array
+	 */
+	public function getLastCall()
+	{
+		return $this->last_call;
+	}
+	
+	/**
+	 * Returns the content type string to add to the header
+	 * @param string 	$content_type
+	 * @return array
+	 */
+	private function getContentType($content_type)
+	{
+		switch ($content_type) {
+			case self::CONTENT_TYPE_XML:
+				return array('Content-Type: text/xml');
 			break;
 			
-			case 'xml':
-				return $this -> _parseXml( $result );
+			case self::CONTENT_TYPE_JSON:
+				return array('Content-Type: application/json');
 			break;
 			
 			default:
-				return $result;
+				return array();
 			break;
 		}
 	}
@@ -235,17 +299,17 @@ class APIcaller
 			case JSON_ERROR_NONE:
 				return $data;
 	        case JSON_ERROR_DEPTH:
-	            return array( 'error' => 'Maximum stack depth exceeded' );
+	            return array('error' => 'Maximum stack depth exceeded');
 	        case JSON_ERROR_STATE_MISMATCH:
-	            return array( 'error' => 'Underflow or the modes mismatch' );
+	            return array('error' => 'Underflow or the modes mismatch');
 	        case JSON_ERROR_CTRL_CHAR:
-	            return array( 'error' => 'Unexpected control character found' );
+	            return array('error' => 'Unexpected control character found');
 	        case JSON_ERROR_SYNTAX:
-	            return array( 'error' => 'Syntax error, malformed JSON' );
+	            return array('error' => 'Syntax error, malformed JSON');
 	        case JSON_ERROR_UTF8:
-	            return array( 'error' => 'Malformed UTF-8 characters, possibly incorrectly encoded' );
+	            return array('error' => 'Malformed UTF-8 characters, possibly incorrectly encoded');
 	        default:
-	            return array( 'error' => 'Unknown error on JSON file' );
+	            return array('error' => 'Unknown error on JSON file');
     	}
 	}
 
@@ -283,74 +347,155 @@ class APIcaller
 	}
 
 	/**
-	 * Returns the last call info
-	 * @return array
+	 * Calls a URL using the GET method
+	 * 
+	 * APIcaller::get( string $url [, array $params [, function $callback [, string $data_type]]]);
+	 * Here are a few examples:
+	 * 		- APIcaller::get('http://path_to_api.com');
+	 * 		- APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'));
+	 * 		- APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); });
+	 * 		- APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); }, 'json');
+	 * 		- APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), 'json');
+	 * 		- APIcaller::get('http://path_to_api.com', 'json');
+	 * 		- APIcaller::get('http://path_to_api.com', function(data) { var_dump($data); }, 'json');
+	 * Any of the above examples is aceptable
+	 * @return string|array|null
 	 */
-	public function getLastCall()
-	{
-		return $this -> _lastCall;
-	}
-	
-	/**
-	 * Returns the content type string to add to the header
-	 * @param string 	$contentType
-	 * @return array
-	 */
-	private function _getContentType( $contentType )
-	{
-		switch ( $contentType ) {
-			case 'xml':
-				return array( 'Content-Type: text/xml' );
-			break;
-			
-			case 'json':
-				return array( 'Content-Type: application/json' );
-			break;
-			
-			default:
-				return array();
-			break;
-		}
-	}
-
 	final public static function get()
 	{
-		if (func_num_args() == 0) {
+		return self::caller(func_get_args(), self::METHOD_GET);
+	}
+
+	/**
+	 * Calls a URL using the POST method
+	 * 
+	 * APIcaller::post( string $url [, array $params [, function $callback [, string $data_type]]]);
+	 * Here are a few examples:
+	 * 		- APIcaller::post('http://path_to_api.com');
+	 * 		- APIcaller::post('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'));
+	 * 		- APIcaller::post('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); });
+	 * 		- APIcaller::post('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); }, 'json');
+	 * 		- APIcaller::post('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), 'json');
+	 * 		- APIcaller::post('http://path_to_api.com', 'json');
+	 * 		- APIcaller::post('http://path_to_api.com', function(data) { var_dump($data); }, 'json');
+	 * Any of the above examples is aceptable
+	 * @return string|array|null
+	 */
+	final public static function post()
+	{
+		return self::caller(func_get_args(), self::METHOD_POST);
+	}
+
+	/**
+	 * Calls a URL using the PUT method
+	 * 
+	 * APIcaller::put( string $url [, array $params [, function $callback [, string $data_type]]]);
+	 * Here are a few examples:
+	 * 		- APIcaller::put('http://path_to_api.com');
+	 * 		- APIcaller::put('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'));
+	 * 		- APIcaller::put('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); });
+	 * 		- APIcaller::put('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); }, 'json');
+	 * 		- APIcaller::put('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), 'json');
+	 * 		- APIcaller::put('http://path_to_api.com', 'json');
+	 * 		- APIcaller::put('http://path_to_api.com', function(data) { var_dump($data); }, 'json');
+	 * Any of the above examples is aceptable
+	 * @return string|array|null
+	 */
+	final public static function put()
+	{
+		return self::caller(func_get_args(), self::METHOD_PUT);
+	}
+
+	/**
+	 * Calls a URL using the DELETE method
+	 * 
+	 * APIcaller::delete( string $url [, array $params [, function $callback [, string $data_type]]]);
+	 * Here are a few examples:
+	 * 		- APIcaller::delete('http://path_to_api.com');
+	 * 		- APIcaller::delete('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'));
+	 * 		- APIcaller::delete('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); });
+	 * 		- APIcaller::delete('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); }, 'json');
+	 * 		- APIcaller::delete('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), 'json');
+	 * 		- APIcaller::delete('http://path_to_api.com', 'json');
+	 * 		- APIcaller::delete('http://path_to_api.com', function(data) { var_dump($data); }, 'json');
+	 * Any of the above examples is aceptable
+	 * @return string|array|null
+	 */
+	final public static function delete()
+	{
+		return self::caller(func_get_args(), self::METHOD_DELETE);		
+	}
+
+	/**
+	 * Deals with the arguments "detection" and sets the rigth configs for the method you specify
+	 * @param array $args
+	 * @param string $method You can use the following constants APIcaller::METHOD_GET, APIcaller::METHOD_POST, APIcaller::METHOD_PUT and APIcaller::METHOD_DELETE 
+	 * @return string|array Depends on the data type you use
+	 */
+	final public static function caller($args, $method)
+	{
+		if (count($args) == 0) {
 			throw new InvalidArgsException("You need specify at least the URL to call");
 		}
 
-		$data      = func_get_args();
 		$url       = null;
 		$params    = null;
 		$callback  = null;
-		$data_type = 'string';
-
-		if (!is_string($data[0]) || !filter_var($data[0], FILTER_VALIDATE_URL)) {
+		$data_type = self::CONTENT_TYPE_NONE;
+		
+		if (!is_string($args[0]) || !filter_var($args[0], FILTER_VALIDATE_URL)) {
 			throw new InvalidArgsException("The URL you specified is not valid.");
 		} else {
-			$url = array_shift($data);
+			$url = array_shift($args);
 		}
 
 		//Is there any parameters to add?
-		if (count($data) > 0 && is_array($data[0])) {
-			$params = array_shift($data);
+		if (count($args) > 0 && is_array($args[0])) {
+			$params = array_shift($args);
 		}
 		
 		//Is there any callback function to call?
-		if (count($data) > 0 && is_callable($data[0])) {
-			$callback = array_shift($data);
+		if (count($args) > 0 && is_callable($args[0])) {
+			$callback = array_shift($args);
 		}
 		
 		//Is there any data type?
-		if (count($data) > 0 && is_string($data[0])) {
-			$data_type = array_shift($data);
+		if (count($args) > 0 && is_string($args[0])) {
+			$data_type = array_shift($args);
+		}
+		//END of arguments treatment
+
+		switch ($method) {
+			case self::METHOD_POST:
+				$opts = self::$opts_post;
+				if (!is_null($params)) {
+					$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
+				}
+			break;
+
+			case self::METHOD_PUT:
+				$opts = self::$opts_put;
+				if (!is_null($params)) {
+					$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
+				}
+			break;
+			
+			case self::METHOD_DELETE:
+				$opts = self::$opts_delete;
+				if (!is_null($params)) {
+					$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
+				}
+			break;
+
+			default: //self::METHOD_GET
+				$opts = array();
+				if (!is_null($params)) {
+					$url .= '?' . http_build_query($params);
+				}
+			break;
 		}
 
-		if (!is_null($params)) {
-			$url .= '?' . http_build_query($params);
-		}
-		
-		$data = self::curl_it($url);
+		$data = self::curl_it($url, $opts);
 
 		$data = self::parseData($data, $data_type);
 
@@ -359,23 +504,14 @@ class APIcaller
 		}
 
 		return $data;
-	}
+	} 
 
-	final public static function post()
-	{
-
-	}
-
-	final public static function put()
-	{
-
-	}
-
-	final public static function delete()
-	{
-
-	}
-
+	/**
+	 * Handles the calls using curl
+	 * @param string $url The URL you want to call
+	 * @param array $opts CURL options to use on the call
+	 * @return string
+	 */
 	private static function curl_it($url, $opts = array())
 	{
 		$curl = curl_init();

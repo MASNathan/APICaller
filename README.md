@@ -1,5 +1,4 @@
 #APIcaller
-==========
 This class is supposed to help you setting up your "caller" to some API.
 You can either extend APIcaller or simply use it similarly to ```$.post``` and ```$.get``` from jQuery.
 

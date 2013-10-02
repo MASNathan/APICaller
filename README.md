@@ -1,5 +1,8 @@
-#APIcaller
-This class is supposed to help you setting up your "caller" to some API.
+#APIcaller <a href="https://www.gittip.com/ReiDuKuduro/" target="__blank" alt="ReiDuKuduro @gittip" ><img alt="ReiDuKuduro @gittip" src="http://bottlepy.org/docs/dev/_static/Gittip.png" /></a>
+
+APIcaller is a class that helps you build API wrappers.  
+You don't have to worry about building URLs, or even about parsing the requested data.
+
 You can either extend APIcaller or simply use it similarly to ```$.post``` and ```$.get``` from jQuery.
 
 #How to Extend

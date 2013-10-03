@@ -2,7 +2,7 @@
     "name": "masnathan/api-caller",
     "type": "library",
     "description": "Calling APIs made easy.",
-    "version": "2.0.0",
+    "version": "0.2.0",
     "keywords": ["api","webservice","request","curl"],
     "homepage": "https://github.com/ReiDuKuduro/APIcaller",
     "license": "MIT",

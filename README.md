@@ -81,6 +81,7 @@ In case of `post_json` and `post_xml` the `$params` argument must be a string, w
     
 ####A few more examples:
 
+```php
 APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'));
 APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); });
 APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); }, 'json');

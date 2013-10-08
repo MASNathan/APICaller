@@ -10,7 +10,6 @@ You can either extend APIcaller or simply use it similarly to ```$.post``` and `
 Here is some quick example.
 
 ```php
-<?php
 class MyClass extends APIcaller
 {
 	function __construct()
@@ -34,7 +33,6 @@ class MyClass extends APIcaller
 Well, this is how you can start creating your class, now, lets make some calls!
 
 ```php
-<?php
 public function callMeBaby($some_number)
 {   
     //1st, you need to set the parameters you want to send
@@ -55,8 +53,6 @@ If you set the format/ response type to ```json``` or ```xml``` and the response
 This is very similar to the ```$.post``` and ```$.get``` functions from jQuery. Below are a few quick examples on how to use it:
     
 ```php
-<?php
-
 //Using GET
 APIcaller::get('http://www.geoplugin.net/json.gp', function($data) {
     $tmp = '';
@@ -80,13 +76,11 @@ Here is the arguments order
 ```php    
 APIcaller::get( string $url [, array $params [, function $callback [, string $data_type]]]);
 ```
-    
+
 In case of `post_json` and `post_xml` the `$params` argument must be a string, with the `json` or `xml` data.
     
 ####A few more examples:
 
-```php
-<?php
 APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'));
 APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); });
 APIcaller::get('http://path_to_api.com', array('param1' => 'some value', 'param2' => 'some other value'), function(data) { var_dump($data); }, 'json');
@@ -106,3 +100,16 @@ APIcaller::get('http://path_to_api.com', function(data) { var_dump($data); }, 'j
 
 ###0.1.0
 * Initial release
+
+#Add me to your project
+If using composer just add:
+```json
+{
+    "require": {
+        "masnathan/api-caller": "0.2.0"
+    }
+}
+```
+If not, just include the `APIcaller.php` file.
+
+Is your project using `APIcaller`? [Let me know](https://github.com/ReiDuKuduro/APIcaller/issues/new?title=New%20script%20using%20APIcaller&body=Name and Description of your script.)!

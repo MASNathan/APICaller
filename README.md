@@ -73,13 +73,17 @@ APIcaller::post('http://tinyurl.com/api-create.php', array('url' => 'http://www.
 });
 ```
 
-You can also use ```APIcaller::put(/***/)``` and ```APIcaller::delete(/***/)```.
+You can also use ```APIcaller::post_json(/***/)```, ```APIcaller::post_xml(/***/)```, ```APIcaller::put(/***/)``` and ```APIcaller::delete(/***/)```.
 
 Here is the arguments order
+
+```php    
+APIcaller::get( string $url [, array $params [, function $callback [, string $data_type]]]);
+```
     
-    APIcaller::get( string $url [, array $params [, function $callback [, string $data_type]]]);
+In case of `post_json` and `post_xml` the `$params` argument must be a string, with the `json` or `xml` data.
     
-and a few more examples:
+####A few more examples:
 
 ```php
 <?php

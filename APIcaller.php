@@ -220,23 +220,18 @@ class APIcaller
 					break;
 
 				case self::METHOD_POST:
-					if (is_string($params) && !is_null($content_type)) {
-						/**
-						 * @todo if the $params is an array, generate the json or the xml string
-						 */
-						$opts = array(
-							CURLOPT_POST           => true,
-							CURLOPT_SSL_VERIFYHOST => false,
-							CURLOPT_SSL_VERIFYPEER => false,
-							CURLOPT_HTTPHEADER     => $this->getContentType($content_type),
-							CURLOPT_POSTFIELDS     => $params,
-						);
-
-						$data = self::curl_it();
-
-
-					} else { //Regular POST
-						$data = self::post($this->api_url . $section, $params);
+					switch ($content_type) {
+						case self::CONTENT_TYPE_JSON:
+							$data = self::post_json($this->api_url . $section, $params);
+							break;
+						
+						case self::CONTENT_TYPE_XML:
+							$data = self::post_xml($this->api_url . $section, $params);
+							break;
+						
+						default: //Regular POST
+							$data = self::post($this->api_url . $section, $params);
+							break;
 					}
 					break;
 				
@@ -268,28 +263,6 @@ class APIcaller
 	public function getLastCall()
 	{
 		return $this->last_call;
-	}
-	
-	/**
-	 * Returns the content type string to add to the header
-	 * @param string 	$content_type
-	 * @return array
-	 */
-	private function getContentType($content_type)
-	{
-		switch ($content_type) {
-			case self::CONTENT_TYPE_XML:
-				return array('Content-Type: text/xml');
-			break;
-			
-			case self::CONTENT_TYPE_JSON:
-				return array('Content-Type: application/json');
-			break;
-			
-			default:
-				return array();
-			break;
-		}
 	}
 
 	/**
@@ -393,6 +366,46 @@ class APIcaller
 	}
 
 	/**
+	 * Uses POST method and send json data to the API 
+	 * 
+	 * APIcaller::post_json( string $url [, string $params [, function $callback [, string $data_type]]]);
+	 * Here are a few examples:
+	 * 		- APIcaller::post_json('http://path_to_api.com');
+	 * 		- APIcaller::post_json('http://path_to_api.com', '{"param1": "some value", "param2": "some other value"}');
+	 * 		- APIcaller::post_json('http://path_to_api.com', '{"param1": "some value", "param2": "some other value"}', function(data) { var_dump($data); });
+	 * 		- APIcaller::post_json('http://path_to_api.com', '{"param1": "some value", "param2": "some other value"}', function(data) { var_dump($data); }, 'json');
+	 * 		- APIcaller::post_json('http://path_to_api.com', '{"param1": "some value", "param2": "some other value"}', 'json');
+	 * 		- APIcaller::post_json('http://path_to_api.com', 'json');
+	 * 		- APIcaller::post_json('http://path_to_api.com', function(data) { var_dump($data); }, 'json');
+	 * Any of the above examples is aceptable
+	 * @return string|array|null
+	 */
+	final public static function post_json()
+	{
+		return self::caller(func_get_args(), self::METHOD_POST, self::CONTENT_TYPE_JSON);
+	}
+
+	/**
+	 * Uses POST method and send xml data to the API 
+	 * 
+	 * APIcaller::post_xml( string $url [, string $params [, function $callback [, string $data_type]]]);
+	 * Here are a few examples:
+	 * 		- APIcaller::post_xml('http://path_to_api.com');
+	 * 		- APIcaller::post_xml('http://path_to_api.com', '<?xml version="1.0" encoding="ISO-8859-1"?><data><param1>some value</param1><param2>some other value</param2></data>');
+	 * 		- APIcaller::post_xml('http://path_to_api.com', '<?xml version="1.0" encoding="ISO-8859-1"?><data><param1>some value</param1><param2>some other value</param2></data>', function(data) { var_dump($data); });
+	 * 		- APIcaller::post_xml('http://path_to_api.com', '<?xml version="1.0" encoding="ISO-8859-1"?><data><param1>some value</param1><param2>some other value</param2></data>', function(data) { var_dump($data); }, 'json');
+	 * 		- APIcaller::post_xml('http://path_to_api.com', '<?xml version="1.0" encoding="ISO-8859-1"?><data><param1>some value</param1><param2>some other value</param2></data>', 'json');
+	 * 		- APIcaller::post_xml('http://path_to_api.com', 'json');
+	 * 		- APIcaller::post_xml('http://path_to_api.com', function(data) { var_dump($data); }, 'json');
+	 * Any of the above examples is aceptable
+	 * @return string|array|null
+	 */
+	final public static function post_xml()
+	{
+		return self::caller(func_get_args(), self::METHOD_POST, self::CONTENT_TYPE_XML);
+	}
+
+	/**
 	 * Calls a URL using the PUT method
 	 * 
 	 * APIcaller::put( string $url [, array $params [, function $callback [, string $data_type]]]);
@@ -438,7 +451,7 @@ class APIcaller
 	 * @param string $method You can use the following constants APIcaller::METHOD_GET, APIcaller::METHOD_POST, APIcaller::METHOD_PUT and APIcaller::METHOD_DELETE 
 	 * @return string|array Depends on the data type you use
 	 */
-	final public static function caller($args, $method)
+	final public static function caller($args, $method, $content_type = null)
 	{
 		if (count($args) == 0) {
 			throw new InvalidArgsException("You need specify at least the URL to call");
@@ -473,10 +486,45 @@ class APIcaller
 
 		switch ($method) {
 			case self::METHOD_POST:
-				$opts = self::$opts_post;
-				if (!is_null($params)) {
-					$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
+
+				switch ($content_type) {
+					case self::CONTENT_TYPE_JSON:
+						$opts = array(
+							CURLOPT_POST           => true,
+							CURLOPT_SSL_VERIFYHOST => false,
+							CURLOPT_SSL_VERIFYPEER => false,
+							CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+							CURLOPT_POSTFIELDS     => $params,
+						);
+						break;
+					
+					case self::CONTENT_TYPE_XML:
+						$opts = array(
+							CURLOPT_POST           => true,
+							CURLOPT_SSL_VERIFYHOST => false,
+							CURLOPT_SSL_VERIFYPEER => false,
+							CURLOPT_HTTPHEADER     => array('Content-Type: text/xml'),
+							CURLOPT_POSTFIELDS     => $params,
+						);
+						break;
+					
+					default: //Regular POST
+						$opts = self::$opts_post;
+						if (!is_null($params)) {
+							$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
+						}
+						break;
 				}
+
+
+
+			case self::CONTENT_TYPE_XML:
+				return array('Content-Type: text/xml');
+			break;
+			
+			case self::CONTENT_TYPE_JSON:
+				return ;
+				
 			break;
 
 			case self::METHOD_PUT:

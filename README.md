@@ -91,6 +91,10 @@ APIcaller::get('http://path_to_api.com', function(data) { var_dump($data); }, 'j
 ``` 
    
 #Changelog
+###0.2.1
+* Added post_xml and post_json functions
+* Fixed minor issues
+
 ###0.2.0
 * Class rework
 * Added static functions to execute REST requests
@@ -107,7 +111,7 @@ If using composer just add:
 ```json
 {
     "require": {
-        "masnathan/api-caller": "0.2.0"
+        "masnathan/api-caller": "0.2.1"
     }
 }
 ```

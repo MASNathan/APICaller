@@ -491,20 +491,16 @@ class APIcaller
 					case self::CONTENT_TYPE_JSON:
 						$opts = array(
 							CURLOPT_POST           => true,
-							CURLOPT_SSL_VERIFYHOST => false,
-							CURLOPT_SSL_VERIFYPEER => false,
 							CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
-							CURLOPT_POSTFIELDS     => $params,
+							CURLOPT_POSTFIELDS     => json_encode($params),
 						);
 						break;
 					
 					case self::CONTENT_TYPE_XML:
 						$opts = array(
 							CURLOPT_POST           => true,
-							CURLOPT_SSL_VERIFYHOST => false,
-							CURLOPT_SSL_VERIFYPEER => false,
 							CURLOPT_HTTPHEADER     => array('Content-Type: text/xml'),
-							CURLOPT_POSTFIELDS     => $params,
+							CURLOPT_POSTFIELDS     => $params, //@todo xml_encode function
 						);
 						break;
 					
@@ -559,18 +555,18 @@ class APIcaller
 	private static function curl_it($url, $opts = array())
 	{
 		$curl = curl_init();
-		
+		var_dump($opts);
 		curl_setopt( $curl, CURLOPT_URL, $url);
 
 		curl_setopt_array($curl, $opts);
 		
-		curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, 0 );
-		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
-		curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5 );
+		curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 5);
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true);
 
-		$result = curl_exec( $curl );
-		
+		$result = curl_exec($curl);
+
 		curl_close($curl);
 
 		return $result;

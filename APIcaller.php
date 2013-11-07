@@ -555,7 +555,7 @@ class APIcaller
 	private static function curl_it($url, $opts = array())
 	{
 		$curl = curl_init();
-		var_dump($opts);
+
 		curl_setopt( $curl, CURLOPT_URL, $url);
 
 		curl_setopt_array($curl, $opts);

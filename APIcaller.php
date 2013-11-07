@@ -515,38 +515,28 @@ class APIcaller
 						}
 						break;
 				}
-
-
-
-			case self::CONTENT_TYPE_XML:
-				return array('Content-Type: text/xml');
-			break;
-			
-			case self::CONTENT_TYPE_JSON:
-				return ;
-				
-			break;
+				break;
 
 			case self::METHOD_PUT:
 				$opts = self::$opts_put;
 				if (!is_null($params)) {
 					$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
 				}
-			break;
+				break;
 			
 			case self::METHOD_DELETE:
 				$opts = self::$opts_delete;
 				if (!is_null($params)) {
 					$opts[CURLOPT_POSTFIELDS] = http_build_query($params);	
 				}
-			break;
+				break;
 
 			default: //self::METHOD_GET
 				$opts = array();
 				if (!is_null($params)) {
 					$url .= '?' . http_build_query($params);
 				}
-			break;
+				break;
 		}
 
 		$data = self::curl_it($url, $opts);

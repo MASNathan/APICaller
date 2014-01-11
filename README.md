@@ -72,4 +72,4 @@ If you set the format/ response type to ```json``` or ```xml``` and the response
 
 This library is under the MIT License, see the complete license [here](LICENSE)
 
-#Is your project using `APIcaller`? [Let me know](https://github.com/ReiDuKuduro/APIcaller/issues/new?title=New%20script%20using%20APIcaller&body=Name and Description of your script.)!
+###Is your project using `APIcaller`? [Let me know](https://github.com/ReiDuKuduro/APIcaller/issues/new?title=New%20script%20using%20APIcaller&body=Name and Description of your script.)!

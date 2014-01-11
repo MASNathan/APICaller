@@ -4,8 +4,7 @@ Simple example on How to use the APIcaller to call an API
 
 API used: http://www.geoplugin.com/
 
-How to use this class:
-
+##How to use this class:
 ```php
 //Initializing the caller
 $geo = new MASNathan\Geoplugin\Geoplugin();

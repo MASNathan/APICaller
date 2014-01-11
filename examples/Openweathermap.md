@@ -4,6 +4,7 @@ Simple example on How to use the APIcaller to call an API
 
 API used: http://openweathermap.org/
 
+##How to use this class:
 ```php
 //Initializing the caller
 $weather = new MASNathan\Openweathermap\Openweathermap('my_api_key');

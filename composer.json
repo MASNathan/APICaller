@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=5.3.0",
-        "masnathan/curl": "dev-master"
+        "masnathan/curl": "0.0.2"
     },
     "autoload": {
         "psr-0": {

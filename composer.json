@@ -13,9 +13,12 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "masnathan/curl": "dev-master"
     },
     "autoload": {
-        "files": ["APIcaller.php"]
+        "psr-0": {
+            "MASNathan\\APIcaller\\": "src/"
+        }
     }
 }

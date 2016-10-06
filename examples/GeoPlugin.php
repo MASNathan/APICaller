@@ -42,14 +42,4 @@ class GeoPlugin extends Caller
 
         return $data;
     }
-
-    public function test()
-    {
-        $response = $this->post('tests/http.php', json_encode(['foo' => 'bar']));
-
-        $data = $this->handleResponseContent($response, 'json');
-
-        dump($data);
-        exit;
-    }
 }

@@ -24,7 +24,6 @@ class GeoPluginClient extends Client
 
     public function getEndpoint()
     {
-        return 'http://localhost/';
         return 'http://www.geoplugin.net/';
     }
 }

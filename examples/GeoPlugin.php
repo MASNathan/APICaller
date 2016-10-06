@@ -28,7 +28,7 @@ class GeoPlugin extends Caller
             'base_currency' => $baseCurrency,
         );
 
-        $response = $this->get('json.gp', $params);
+        $response = $this->client->get('json.gp', $params);
 
         $data = $this->handleResponseContent($response, 'json');
 

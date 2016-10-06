@@ -75,7 +75,7 @@ abstract class Client
      */
     protected function getUrl($section, array $uriParams = [])
     {
-        $endpoint = rtrim($this->client->getEndpoint(), '/');
+        $endpoint = rtrim($this->getEndpoint(), '/');
         $section = ltrim($section, '/');
         $params = http_build_query($uriParams);
 

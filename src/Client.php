@@ -2,7 +2,7 @@
 
 namespace MASNathan\APICaller;
 
-use Http\Client\Common\HttpMethodsClient;
+use MASNathan\APICaller\Clients\HttpMethodsClient;
 use Http\Client\Common\Plugin\HeaderDefaultsPlugin;
 use Http\Client\Common\Plugin\HeaderSetPlugin;
 use Http\Client\Common\PluginClient;
@@ -346,5 +346,13 @@ abstract class Client
         }
 
         return $this->client->options($this->getUrl($section), $headers, $body);
+    }
+
+    /**
+     * @return Operation
+     */
+    public function getLastOperation()
+    {
+        return $this->client->getLastOperation();
     }
 }

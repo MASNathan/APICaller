@@ -56,4 +56,12 @@ abstract class Caller
 
         return $contents;
     }
+
+    /**
+     * @return Client
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
 }

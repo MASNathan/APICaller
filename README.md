@@ -1,4 +1,4 @@
-#APIcaller 
+# APIcaller 
 
 [![Downloads with Composer](https://poser.pugx.org/masnathan/api-caller/downloads.png)](https://packagist.org/packages/masnathan/api-caller)
 [![SensioLabs Insight](https://insight.sensiolabs.com/projects/a1bfb7a8-0b34-4118-a451-fc8f158ef9c7/mini.png)](https://insight.sensiolabs.com/projects/6d9231d8-9140-4b02-9522-5d3c3aa3d6f2)
@@ -7,69 +7,103 @@
 APIcaller is a class that helps you build API wrappers.  
 You don't have to worry about building URLs, or even about parsing the requested data.
 
-# How to install via Composer
+## How to use
 
-The recommended way to install is through [Composer](http://composer.org).
-
-```sh
-# Install Composer
-$ curl -sS https://getcomposer.org/installer | php
-
-# Add APIcaller as a dependency
-$ php composer.phar require masnathan/api-caller:dev-master
-```
-
-Once it's installed, you need to require Composer's autoloader:
+You will have to extend the ```Client``` class and the ```Caller``` class, the ```Client``` will handle all the 
+configuration to use on the requests and the ```Caller``` will be used as the interface to interact with the API.
 
 ```php
-require 'vendor/autoload.php';
-```
+use MASNathan\APICaller\Client;
+use MASNathan\APICaller\Caller;
 
-#How to Extend
-Here is some quick example.
-
-```php
-class MyClass extends APIcaller
+class MyPackageClient extends Client
 {
-	function __construct()
-	{
-	    /*
-	     * Calling the parent construct you can send the API URL, set the request method and/or the response type
-	     * The API URL must be a valid url
-       	 * The Request Method to use [GET|POST|PUT|DELETE], we have constants APIcaller::METHOD_GET, APIcaller::METHOD_…
-       	 * The format of the data the webservice will return, can be APIcaller::CONTENT_TYPE_NONE, APIcaller::CONTENT_TYPE_JSON or APIcaller::CONTENT_TYPE_XML
-	     */
-		parent::__construct('http://www.some_api.com/', APIcaller::METHOD_GET, 'json');
-		
-		//You can also set some default parameters to use on the calls, like api keys and such.
-		$this->setDefault('api_key', 'key');
-	}
-	
-	/****/
+    /**
+     * Here you can set the default headers and parameters on a global scope
+     */
+    public function __construct($ip = null)
+    {
+        $this->setDefaultHeaders([
+            'User-Agent' => 'PHP APICaller SDK',
+            'Accept'     => 'application/json',
+            'Token'      => '123456',
+        ]);
+        $this->setDefaultParameters([
+            'ip' => $ip ?: '127.0.0.1',
+        ]);
+    }
+
+    /**
+     * Returns the API Endpoint
+     *
+     * @return string
+     */
+    public function getEndpoint()
+    {
+        return 'http://api.domain.com/v1/';
+    }
+}
+
+class MyPackageCaller extends Caller
+{
+    public function requestSomething($foo, $bar)
+    {
+        $params = [
+            'foo' => $foo,
+            'bar' => $bar,
+        ];
+
+        // this will result in this url http://api.domain.com/v1/some-method.json?ip={$ip}&foo={$foo}&bar={$bar}
+        $response = $this->client->get('some-method.json', $params);
+
+        $data = $this->handleResponseContent($response, 'json');
+
+        // Do something with your data
+
+        return $data;
+    }
 }
 ```
 
 Well, this is how you can start creating your class, now, lets make some calls!
 
 ```php
-public function callMeBaby($some_number)
-{   
-    //1st, you need to set the parameters you want to send
-    $params = array(
-            'number' => $some_number,
-            'other'  => 'info',
-        );
-    //2nd, you send the request
-    return $this->call('call_a_friend', $params);
-}
+$client = new MyPackageClient('8.8.8.8');
+$caller = new MyPackageCaller($client);
+
+$result = $caller->requestSomething(13, 37);
+
+var_dump($result);
 ```
 
-This function will call the following url:```http://www.some_api.com/call_a_friend?api_key=key&number=1&other=info```.
+This will call the following url:```http://api.domain.com/v1/some-method.json?ip=8.8.8.8&foo=13&bar=37```.
 
-If you set the format/ response type to ```json``` or ```xml``` and the response has a valid format, the ```$this->call()```function will return an array with the parsed data, if not, it'll return a string of the response.
+## Installation
+
+To install the SDK, you will need to be using [Composer](http://composer.org) in your project. If you don't have composer 
+installed check this page and follow the [installation steps](https://getcomposer.org/download/)
+
+This library is not hard coupled to Guzzle or any other library that sends HTTP messages. 
+It uses an abstraction called [HTTPlug](http://httplug.io/). 
+This will give you the flexibility to choose what PSR-7 implementation and HTTP client to use.
+
+To get started ASAP you should run the following command:
+
+```sh
+# Add APIcaller as a dependency
+$ composer require masnathan/api-caller php-http/curl-client guzzlehttp/psr7
+```
+
+## Why do I need to require all those packages?
+
+APICaller depends on the virtual package [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
+which requires to you install an adapter, but we do not care which one. 
+That is an implementation detail in your application. 
+We also need a PSR-7 implementation and a message factory.
+
+You don't have to use the [php-http/curl-client](https://github.com/php-http/curl-client) if you don't want to. 
+Read more about the virtual packages, why this is a good idea and about the flexibility it brings at the [HTTPlug docs](http://docs.php-http.org/en/latest/index.html).
 
 # License
 
 This library is under the MIT License, see the complete license [here](LICENSE)
-
-###Is your project using `APIcaller`? [Let me know](https://github.com/ReiDuKuduro/APIcaller/issues/new?title=New%20script%20using%20APIcaller&body=Name and Description of your script.)!

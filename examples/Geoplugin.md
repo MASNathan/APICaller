@@ -7,13 +7,14 @@ API used: http://www.geoplugin.com/
 ##How to use this class:
 ```php
 //Initializing the caller
-$geo = new MASNathan\Geoplugin\Geoplugin();
+$client = new MASNathan\Geoplugin\GeoPluginClient();
+$geo = new MASNathan\Geoplugin\Geoplugin($client);
 
 //Getting IP info
 $geo->getLocation('173.194.41.223');
 $geo->getLocation('173.194.41.223', 'EUR', true);
 $geo->getLocation('173.194.41.223', 'USD', true);
 
-//Get the last call to the API
-$geo->getLastCall();
+//Get the last request and response to the API
+var_dump($geo->getLastOperation());
 ```

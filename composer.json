@@ -24,7 +24,7 @@
     "masnathan/parser": "^0.0.1"
   },
   "require-dev": {
-    "php-http/mock-client": "^0.3.3",
+    "php-http/mock-client": "^1.0.1",
     "guzzlehttp/psr7": "^1.0",
     "php-http/curl-client": "^1.6",
     "symfony/var-dumper": "^3.1"

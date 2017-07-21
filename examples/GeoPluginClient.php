@@ -5,11 +5,10 @@ namespace MASNathan\GeoPlugin;
 use MASNathan\APICaller\Client;
 
 /**
- * Geoplugin - API Wrapper for http://www.geoplugin.com/, Simple example on How to use the APIcaller class to call an
- * API
+ * Geoplugin - API Wrapper for http://www.geoplugin.com/,
+ * Simple example on How to use the APIcaller class to call an API
  *
  * @author    André Filipe <andre.r.flip@gmail.com>
- * @version   0.1.2
  */
 class GeoPluginClient extends Client
 {

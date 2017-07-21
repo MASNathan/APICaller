@@ -5,11 +5,10 @@ namespace MASNathan\GeoPlugin;
 use MASNathan\APICaller\Caller;
 
 /**
- * GeoPlugin - API Wrapper for http://www.geoplugin.com/, Simple example on How to use the APIcaller class to call an
- * API
+ * GeoPlugin - API Wrapper for http://www.geoplugin.com/,
+ * Simple example on How to use the APIcaller class to call an API
  *
  * @author    André Filipe <andre.r.flip@gmail.com>
- * @version   0.1.2
  */
 class GeoPlugin extends Caller
 {
@@ -23,17 +22,17 @@ class GeoPlugin extends Caller
      */
     public function getLocation($ip = '', $baseCurrency = '', $renameArrayKeys = false)
     {
-        $params = array(
+        $params = [
             'ip'            => !$ip ? $_SERVER['REMOTE_ADDR'] : $ip,
             'base_currency' => $baseCurrency,
-        );
+        ];
 
         $response = $this->client->get('json.gp', $params);
 
         $data = $this->handleResponseContent($response, 'json');
 
         if ($renameArrayKeys) {
-            $tmpData = array();
+            $tmpData = [];
             foreach ($data as $key => $value) {
                 $tmpData[str_replace('geoplugin_', '', $key)] = $value;
             }
